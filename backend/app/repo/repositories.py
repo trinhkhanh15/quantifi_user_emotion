@@ -2,6 +2,7 @@ from unicodedata import category
 import models
 from database import engine
 from sqlalchemy import select, func, delete
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from schemas import user as sche_user, saving as sche_saving, transaction as sche_transaction, subscription as sche_subscription
 from core.security.encryption import verity_password
@@ -57,16 +58,30 @@ class UserRepository(BaseRepository):
         return True
 
     async def create(self, user: sche_user.CreateUser):
+        # Defensive check to avoid unique constraint violation
+        existing = await self.get_by_name(user.username)
+        if existing:
+            return None
+
         new_user = models.User(
             username=user.username,
             password=user.password,
             age=user.age,
             sex=user.sex
         )
-        self.db.add(new_user)
-        await self.db.commit()
-        await self.db.refresh(new_user)
-        return new_user
+        try:
+            self.db.add(new_user)
+            await self.db.commit()
+            await self.db.refresh(new_user)
+            return new_user
+        except IntegrityError:
+            # Another transaction may have created the same username concurrently.
+            await self.db.rollback()
+            return None
+        except Exception:
+            # Ensure session rollback on error to avoid dirty transaction state
+            await self.db.rollback()
+            raise
 
     async def update_balance(self, user_id: int, amount: float):
         user = await self.get_by_id(user_id)

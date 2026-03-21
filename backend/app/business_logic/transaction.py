@@ -1,7 +1,8 @@
 from schemas.transaction import CreateTransaction
-from repo.repositories import TransactionRepository, SubscriptionRepository, UserRepository
+from repo.repositories import TransactionRepository, SubscriptionRepository, UserRepository, SavingRepository
 from business_logic.subscription import trigger_subscription
 from business_logic.user import update_balance
+from business_logic.chatbot import LLModel
 from core.log.logging_activity import log_activity
 from datetime import datetime, timedelta, date
 import pandas as pd
@@ -12,7 +13,8 @@ async def process_transaction(
         data: CreateTransaction,
         user_repo: UserRepository,
         transaction_repo: TransactionRepository,
-        subscription_repo: SubscriptionRepository):
+        subscription_repo: SubscriptionRepository,
+        saving_repo: SavingRepository):
     data = await trigger_subscription(user_id, data, subscription_repo)
     amount = data.amount
     if data.category.lower() != "income":
@@ -23,8 +25,8 @@ async def process_transaction(
             await update_balance(user_id, -amount, user_repo)
             new_transaction = await create(user_id, data, transaction_repo, insufficient_balance=False)
     else:
-        await update_balance(user_id, amount, user_repo)
         new_transaction = await create(user_id, data, transaction_repo, insufficient_balance=False)
+        await update_balance(user_id, amount, user_repo)
     return new_transaction
 
 
@@ -37,6 +39,18 @@ async def create(user_id: int, data: CreateTransaction, transaction_repo: Transa
         msg = f"Created transaction ID={new_transaction.id} for user ID={user_id} successfully"
         log_activity(msg, "info")
     return new_transaction
+
+
+async def alert_regret(user_id, 
+                       data: CreateTransaction,
+                       user_repo: UserRepository,
+                       transaction_repo: TransactionRepository,
+                       subscription_repo: SubscriptionRepository,
+                       saving_repo: SavingRepository):
+    llm = LLModel(user_id, data, user_repo, transaction_repo, subscription_repo, saving_repo)
+    await llm.request("alert")
+    response = await llm.response()
+    return response
 
 
 async def validate_insufficient_transaction(user_id: int, amount: float, user_repo: UserRepository):
@@ -118,7 +132,8 @@ async def import_csv_transactions(
         csv_data: io.BytesIO,
         user_repo: UserRepository,
         transaction_repo: TransactionRepository,
-        subscription_repo: SubscriptionRepository):
+        subscription_repo: SubscriptionRepository,
+        saving_repo: SavingRepository):
 
     result = {"success": 0, "failed": 0}
     
@@ -183,7 +198,7 @@ async def import_csv_transactions(
                 description=description
             )
             
-            new_transaction = await process_transaction(user_id, transaction_data, user_repo, transaction_repo, subscription_repo)
+            new_transaction = await process_transaction(user_id, transaction_data, user_repo, transaction_repo, subscription_repo, saving_repo)
             result["success"] += 1
             
         except Exception as e:

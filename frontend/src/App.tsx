@@ -10,6 +10,7 @@ import { TransactionsPage } from '@/features/transactions/pages/TransactionsPage
 import { SavingPage } from '@/features/saving/pages/SavingPage'
 import { SubscriptionsPage } from '@/features/subscriptions/pages/SubscriptionsPage'
 import { BudgetPage } from '@/features/budget/pages/BudgetPage'
+import { ChatbotPage } from '@/features/chatbot/pages/ChatbotPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +71,16 @@ function App() {
               <ProtectedRoute>
                 <AppLayout>
                   <BudgetPage />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chatbot"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <ChatbotPage />
                 </AppLayout>
               </ProtectedRoute>
             }

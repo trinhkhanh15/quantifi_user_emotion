@@ -39,6 +39,9 @@ export const transactionApi = {
   manual: (data: CreateTransactionRequest) =>
     api.post<Transaction>('/transaction/manual', data),
 
+  alertRegret: (data: CreateTransactionRequest) =>
+    api.post<{ alert: string }>('/transaction/alert_regret', data),
+
   importCsv: (file: File) => {
     const form = new FormData()
     form.append('file', file)

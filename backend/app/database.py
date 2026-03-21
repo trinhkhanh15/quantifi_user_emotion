@@ -6,7 +6,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://admin:123@localho
 
 engine = create_async_engine(
     DATABASE_URL,
-    echo=False, # Set True nếu muốn xem log SQL chạy dưới console
+    echo=True, # Set True nếu muốn xem log SQL chạy dưới console
     future=True
 )
 

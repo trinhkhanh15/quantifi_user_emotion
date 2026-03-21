@@ -13,6 +13,20 @@ export function useUncategorizedTransactions() {
   })
 }
 
+export function useAlertRegret() {
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: (data: CreateTransactionRequest) =>
+      transactionApi.alertRegret(data).then((r) => r.data),
+    onError: (err: { response?: { data?: { detail?: string } } }) => {
+      const msg =
+        (err.response?.data?.detail as string) || 'Failed to get alert'
+      toast({ title: msg, variant: 'destructive' })
+    },
+  })
+}
+
 export function useCreateTransaction() {
   const queryClient = useQueryClient()
   const { toast } = useToast()

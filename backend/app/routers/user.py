@@ -13,8 +13,17 @@ router = APIRouter()
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def signup(request: sche_user.CreateUser, user_repo: UserRepository = Depends(get_user_repo)):
+    # Check if username already exists and return a clear HTTP error instead of letting the DB raise IntegrityError
+    existing = await user_repo.get_by_name(request.username)
+    if existing:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists")
+
     new_user = encode_account(request)
-    return await user_repo.create(new_user)
+    created = await user_repo.create(new_user)
+    if not created:
+        # Repository returns None when username exists or on integrity conflict
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists")
+    return created
 
 @router.post("/login", status_code=status.HTTP_200_OK)
 async def login(request: Annotated[OAuth2PasswordRequestForm, Depends()], user_repo: UserRepository = Depends(get_user_repo)):
