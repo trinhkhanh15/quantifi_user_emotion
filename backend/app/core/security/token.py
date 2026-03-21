@@ -8,7 +8,7 @@ from jwt.exceptions import InvalidTokenError
 from sqlalchemy.orm import Session
 
 from repo.repositories import UserRepository
-from dependancies import get_db
+from dependancies.injection import get_db
 
 SECRET_KEY = "04f3c2193c17285075dedb5544d6e898dbb208f2740447a6449760b1ecf42e0d"
 ALGORITHM = "HS256"

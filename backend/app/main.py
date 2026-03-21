@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware # Thêm dòng này
-from routers import user, saving, transaction, subscription, quantifi
+from routers import user, saving, transaction, subscription, chatbot
 from contextlib import asynccontextmanager
 from repo.repositories import init_db
 
@@ -26,7 +26,7 @@ app.include_router(user.router, tags=["user"], prefix="/user")
 app.include_router(saving.router, tags=["saving"], prefix="/saving")
 app.include_router(transaction.router, tags=["transaction"], prefix="/transaction")
 app.include_router(subscription.router, tags=["subscription"], prefix="/subscription")
-app.include_router(quantifi.router, tags=["quantifi"], prefix="/quantifi")
+app.include_router(chatbot.router, tags=["chatbot"], prefix="/chatbot")
 
 @app.get("/")
 async def root():

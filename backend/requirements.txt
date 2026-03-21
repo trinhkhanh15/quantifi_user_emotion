@@ -13,3 +13,4 @@ asyncpg
 passlib
 joblib
 numpy
+jwt
