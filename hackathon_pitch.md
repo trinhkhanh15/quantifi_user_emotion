@@ -1,4 +1,4 @@
-# FinanceFeel — Know How You'll Feel Before You Spend
+# EmoFin — Know How You'll Feel Before You Spend
 
 ---
 
@@ -24,7 +24,7 @@ What people actually need is a **co-pilot** — something that reads the behavio
 
 ## 3. Solution Overview
 
-**FinanceFeel** is an AI behavioral finance layer that predicts two emotional scores in real time — directly from a user's existing transaction data:
+**EmoFin** is an AI behavioral finance layer that predicts two emotional scores in real time — directly from a user's existing transaction data:
 
 - **Regret Score** — how likely you are to regret this spending pattern
 - **Resilience Score** — how well you'll recover if you do spend
@@ -47,7 +47,7 @@ The result is a living emotional fingerprint of your financial health. Not a sco
 
 Think of it like a weather forecast — but for your wallet.
 
-When you're about to make a purchase, FinanceFeel already knows:
+When you're about to make a purchase, EmoFin already knows:
 - You've been on a shopping streak for 3 days
 - You cancelled a subscription 5 days ago
 - Your savings goal deadline is 3 weeks away
@@ -59,7 +59,7 @@ It combines all of that into a single human signal: *"Heads up — your Regret S
 
 ## 6. User Experience
 
-FinanceFeel integrates directly into any fintech app as a lightweight behavioral layer.
+EmoFin integrates directly into any fintech app as a lightweight behavioral layer.
 
 Users see:
 - A **daily emotional snapshot** — their Regret and Resilience scores at a glance
@@ -75,7 +75,7 @@ This creates a natural daily check-in loop — not because we ask users to open 
 
 Financial regret isn't just uncomfortable — it's a gateway to anxiety, avoidance, and long-term disengagement from personal finance.
 
-FinanceFeel turns that cycle around. Users who understand their behavioral patterns make fewer impulsive decisions, recover faster from financial shocks, and build stronger goal discipline — without being lectured or shamed.
+EmoFin turns that cycle around. Users who understand their behavioral patterns make fewer impulsive decisions, recover faster from financial shocks, and build stronger goal discipline — without being lectured or shamed.
 
 **Better financial behavior. Less financial stress. More people in control of their future.**
 
@@ -83,9 +83,9 @@ FinanceFeel turns that cycle around. Users who understand their behavioral patte
 
 ## 8. Scalability
 
-FinanceFeel is built to grow — and every part of the architecture accelerates that growth.
+EmoFin is built to grow — and every part of the architecture accelerates that growth.
 
-Because the system runs entirely on transaction data that banks and fintechs already collect, **onboarding a new user costs nothing extra**. No surveys, no setup, no cold start. The moment a user has transaction history, FinanceFeel works for them — whether they're a student with 20 transactions or a professional with 2,000.
+Because the system runs entirely on transaction data that banks and fintechs already collect, **onboarding a new user costs nothing extra**. No surveys, no setup, no cold start. The moment a user has transaction history, EmoFin works for them — whether they're a student with 20 transactions or a professional with 2,000.
 
 More users means more behavioral patterns. More patterns means a sharper fine-tuned model. A sharper model means more accurate, more personal nudges — which drives higher engagement, which brings more users. **It's a compounding flywheel, not a linear growth curve.**
 
@@ -95,7 +95,7 @@ And because the scoring API is stateless and hosted on AWS, scaling from 10,000 
 
 ## 9. Integration Potential
 
-FinanceFeel is designed as a **plug-in behavioral intelligence API** — drop it into any existing fintech, neobank, or mobility super-app.
+EmoFin is designed as a **plug-in behavioral intelligence API** — drop it into any existing fintech, neobank, or mobility super-app.
 
 Imagine: a ride-hailing app that nudges you before an impulse upgrade. A BNPL platform that shows your Regret Score before you split a payment. A savings app that celebrates your Resilience streak.
 
@@ -257,7 +257,7 @@ As the user base grows, every transaction becomes a new data point. Every regret
 
 We don't just track money. We track the *human* behind the money.
 
-FinanceFeel is the first system that predicts how you'll feel about your financial decisions — before you make them. It doesn't replace your willpower. It quietly shows up for you when your willpower is running low.
+EmoFin is the first system that predicts how you'll feel about your financial decisions — before you make them. It doesn't replace your willpower. It quietly shows up for you when your willpower is running low.
 
 **Because the best financial advice isn't a budget. It's self-awareness, delivered at the right moment.**
 
