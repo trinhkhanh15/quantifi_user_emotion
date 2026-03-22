@@ -143,8 +143,7 @@ $$\text{PRS} = \sigma\!\left(2.0 \cdot S_{\text{impulse}} + 2.5 \cdot S_{\text{b
 |---|---|---|
 | $S_{\text{impulse}}$ | Impulse spending ratio | `0.5 * (non_essential_count / total_count) + 0.5 * (non_essential_amt / total_amt)` |
 | $S_{\text{budget}}$ | Budget overshoot across categories | `2 * sigmoid(3 * mean_overshoot) - 1`, clamped to `[0, 1]` |
-| $S_{\text{goal}}$ | Goal disruption severity | `(1/G) * sum[0.6 
-* min(spend/remaining, 1) + 0.4 * sigmoid((days_now/days_target) - 1)]` |
+| $S_{\text{goal}}$ | Goal disruption severity | `(1/G) * sum[0.6 * min(spend/remaining, 1) + 0.4 * sigmoid((days_now/days_cf) - 1)]` |
 | $S_{\text{sub}}$ | Subscription churn signal | `min(cancelled_14d / total_subs, 1)` |
 | $S_{\text{night}}$ | Late-night spending ratio | `(late_night_non_ess_count / recent_count)` |
 | $S_{\text{pressure}}$ | Expense-to-income pressure | `sigmoid(3 * (expenses / income - 0.7))` |
