@@ -157,7 +157,7 @@ $$\text{Resilience} = \sigma\!\left(1.75 \cdot R_{\text{recovery}} + 2.10 \cdot 
 
 | Signal | Purpose | Formula |
 |---|---|---|
-| $R_{\text{recovery}}$ | Balance recovery speed after shocks | `(1/|S|) * sum(exp(-0.05 * d_s))` — exponential decay of days since balance dip |
+| $R_{\text{recovery}}$ | Balance recovery speed after shocks | $\frac{1}{\|S\|} \sum_{s} e^{-0.05 \cdot d_s}$ where $d_s$ = days since balance dip, S = set of dips |
 | $R_{\text{goal}}$ | Goal funding consistency | `0.6 * exp(-CV) + 0.4 * (active_months / total_months)` |
 | $R_{\text{structure}}$ | Spending structure sustainability | `exp(-(r - 0.6)^2 / 0.08)` where `r = essential / total` (peak at 60% essential spending) |
 | $R_{\text{entropy}}$ | Spending diversification | `H(p) / ln(K)` where `H(p) = -sum(p_i * ln(p_i))` (Shannon entropy of category distribution) |
