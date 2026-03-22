@@ -105,31 +105,64 @@ The behavioral layer is universal. The integration is seamless.
 
 ## 10. Technical Signals
 
-### Regret Score
+### Immediate Regret Score (IRS) — Real-Time Transaction Risk
 
-$$\text{Regret} = \sigma\!\left(2.0\,S_{\text{impulse}} + 2.5\,S_{\text{budget}} + 3.0\,S_{\text{goal}} + 1.5\,S_{\text{sub}} + 1.0\,S_{\text{night}} - 3.0\right)$$
+$$\text{IRS} = \sigma\!\left(4.5 \cdot \text{raw} - 2.0\right)$$
 
-| Signal | Formula | Why It Causes Regret |
+where
+
+$$\text{raw} = \min\left(1.5,\, (\text{linear} + \text{penalty}) \cdot \text{amplifier}\right)$$
+
+**Linear Component:** Weighted sum of 8 signals
+$$\text{linear} = 0.208 \cdot S_{\text{budget}} + 0.189 \cdot S_{\text{income}} + 0.094 \cdot S_{\text{time}} + 0.189 \cdot S_{\text{goal}} + 0.123 \cdot S_{\text{freq}} + 0.085 \cdot S_{\text{cat}} + 0.066 \cdot S_{\text{dom}} + 0.047 \cdot S_{\text{vel}}$$
+
+**Convergence Penalty:** Non-linear amplification when $N \geq 2$ signals are active simultaneously
+$$\text{penalty} = \min(0.35,\, 0.04 \cdot N^{1.6})$$
+
+**Interaction Amplifiers:** 5 behavioral feedback loops
+$$\text{amplifier} = 1.0 + 0.25 \cdot S_{\text{time}} \cdot S_{\text{vel}} + 0.35 \cdot S_{\text{budget}} \cdot S_{\text{goal}} + 0.20 \cdot S_{\text{freq}} \cdot S_{\text{cat}} + 0.18 \cdot S_{\text{dom}} \cdot S_{\text{budget}} + 0.15 \cdot S_{\text{time}} \cdot S_{\text{income}}$$
+
+| Signal | Purpose | Formula |
 |---|---|---|
-| $S_{\text{impulse}}$ | $0.5\cdot\dfrac{N_{\text{non-essential}}}{N_{\text{total}}} + 0.5\cdot\dfrac{\sum\text{amt}_{\text{non-essential}}}{\sum\text{amt}_{\text{all}}}$ | Impulse purchases bypass rational decision-making. Once the excitement fades, users perceive the gap between reward received and cost paid — triggering counterfactual regret. |
-| $S_{\text{budget}}$ | $\sigma\!\left(2\cdot\dfrac{1}{K}\sum\max\!\left(0,\,\dfrac{\text{spent}_i - \text{budget}_i}{\text{budget}_i}\right)\right)$ | Budgets are self-imposed commitment devices. Breaking them triggers a "broken promise" effect — users shift from *"I'm in control"* to *"I failed my own plan."* |
-| $S_{\text{goal}}$ | $\dfrac{1}{G}\sum_g\!\left[0.6\cdot\min\!\left(\dfrac{\text{non-goal spend}}{\text{remaining}_g},1\right)+0.4\cdot\sigma\!\left(\dfrac{d_{\text{now}}}{d_{\text{counterfactual}}}-1\right)\right]$ | Spending that widens the gap to a savings goal forces users to confront sunk cost — the time and money already invested. The velocity component captures the rising daily savings burden. |
-| $S_{\text{sub}}$ | $\min\!\left(\dfrac{N_{\text{cancelled within 14d of billing}}}{N_{\text{total subs}}},\;1\right)$ | Rapid cancellation after a billing event is the strongest revealed-preference regret signal — it requires an active corrective action, meaning the user consciously reversed a decision. |
-| $S_{\text{night}}$ | $\dfrac{N_{\text{late-night non-essential}}}{N_{\text{total recent}}}$ | Executive function degrades between 11 PM – 4 AM. Purchases made in low-willpower hours on non-essential categories are disproportionately regretted the following morning. |
+| $S_{\text{budget}}$ | Budget breach severity | $\min(1, \max(0, \frac{\text{spent}_{\text{month}} + \text{txn} - \text{budget}}{\text{budget}}))$ |
+| $S_{\text{income}}$ | Transaction shock relative to income | $\min(1, (\frac{\text{txn}}{\text{monthly\_income}})^{0.7})$ |
+| $S_{\text{time}}$ | Late-night vulnerability | Piecewise: $0.0$ (6–21h), $0.3$ (21–23h), $0.7$ (23–1h), $1.0$ (1–5h), $0.5$ (5–6h) |
+| $S_{\text{goal}}$ | Goal conflict severity | $\min(1, \frac{\text{txn}}{\text{remaining\_needed}} \cdot \frac{30}{\max(\text{days\_left}, 1)})$ |
+| $S_{\text{freq}}$ | Category frequency anomaly | $\min(1, \max(0, \frac{\text{recent\_count} - \text{baseline\_weekly}}{\max(\text{baseline\_weekly}, 1)}))$ |
+| $S_{\text{cat}}$ | Category risk profile | Lookup table (Groceries: 0.00 → Gambling: 0.90) |
+| $S_{\text{dom}}$ | Day-of-month timing | $\max(0, \text{month\_remaining\_ratio} - \text{budget\_remaining\_ratio})$ |
+| $S_{\text{vel}}$ | Spending velocity (spree detection) | $\min(1, \frac{\text{txns\_last\_2h}}{5} \cdot 0.5 + \frac{\text{amount\_last\_2h}}{\text{daily\_budget}} \cdot 0.5)$ |
 
 ---
 
-### Resilience Score
+### Periodic Regret Score (PRS) — Weekly/Monthly Pattern Review
 
-$$\text{Resilience} = \sigma\!\left(2.5\,R_{\text{recovery}} + 3.0\,R_{\text{goal}} + 1.5\,R_{\text{structure}} + 1.0\,R_{\text{entropy}} + 2.0\,R_{\text{adherence}} - 4.0\right)$$
+$$\text{PRS} = \sigma\!\left(2.0 \cdot S_{\text{impulse}} + 2.5 \cdot S_{\text{budget}} + 3.0 \cdot S_{\text{goal}} + 1.5 \cdot S_{\text{sub}} + 1.0 \cdot S_{\text{night}} + 2.0 \cdot S_{\text{pressure}} - 3.0\right)$$
 
-| Signal | Formula | Why It Indicates Resilience |
+| Signal | Purpose | Formula |
 |---|---|---|
-| $R_{\text{recovery}}$ | $\dfrac{1}{\|\mathcal{S}\|}\displaystyle\sum_{s\in\mathcal{S}} e^{-0.05\,d_s}$ | Fast balance recovery after a financial shock reveals active management — the user has reserves or immediately adjusts spending. Exponential decay ensures 1–3 day recovery scores far higher than 20+ days. |
-| $R_{\text{goal}}$ | $0.6\cdot e^{-\text{CV}} + 0.4\cdot\text{participation rate}$ | A user who contributes to goals consistently — even during hard months — demonstrates self-regulatory persistence. CV captures evenness; participation captures commitment. |
-| $R_{\text{structure}}$ | $\exp\!\left(-\dfrac{(r-0.6)^2}{0.08}\right),\quad r=\dfrac{\sum\text{amt}_{\text{fixed}}}{\sum\text{amt}_{\text{all}}}$ | Both too little structure (chaotic spending) and too much (no flexibility buffer) are financial risks. The sweet spot at 60% fixed signals automated essentials with maintained adaptability. |
-| $R_{\text{entropy}}$ | $\dfrac{H(\mathbf{p})}{\ln K},\quad H(\mathbf{p})=-\displaystyle\sum_i p_i\ln p_i$ | Spending concentrated in one category signals dependency and vulnerability. A diversified profile reflects balanced life needs rather than compulsive over-indexing. |
-| $R_{\text{adherence}}$ | $\dfrac{1}{K}\displaystyle\sum_i e^{-\max(0,\,\delta_i)},\quad\delta_i=\dfrac{\text{spent}_i-\text{budget}_i}{\text{budget}_i}$ | Where goal consistency measures financial offense, budget adherence measures defense. Following through on self-imposed limits is a direct proxy for financial willpower. |
+| $S_{\text{impulse}}$ | Impulse spending ratio | $0.5 \cdot \frac{N_{\text{non-essential}}}{N_{\text{total}}} + 0.5 \cdot \frac{\text{sum\_amt}_{\text{non-ess}}}{\text{sum\_amt}_{\text{all}}}$ |
+| $S_{\text{budget}}$ | Budget overshoot across categories | $2 \cdot \sigma(3 \cdot \text{mean\_overshoot}) - 1$, clamped to $[0, 1]$ |
+| $S_{\text{goal}}$ | Goal disruption severity | $\frac{1}{G} \sum_g \left[0.6 \cdot \min(\frac{\text{non-goal\_spend}}{\text{remaining}_g}, 1) + 0.4 \cdot \sigma(\frac{\text{days\_now}}{\text{days\_counterfactual}} - 1)\right]$ |
+| $S_{\text{sub}}$ | Subscription churn signal | $\min(\frac{\text{cancelled\_14d}}{N_{\text{total\_subs}}}, 1)$ |
+| $S_{\text{night}}$ | Late-night spending ratio | $\frac{N_{\text{late-night non-ess}}}{N_{\text{recent}}}$ |
+| $S_{\text{pressure}}$ | Expense-to-income pressure | $\sigma(3 \cdot (\frac{E_{\text{month}}}{I_{\text{month}}} - 0.7))$ |
+
+---
+
+### Resilience Score — Financial Recovery & Stability
+
+$$\text{Resilience} = \sigma\!\left(1.75 \cdot R_{\text{recovery}} + 2.10 \cdot R_{\text{goal}} + 1.05 \cdot R_{\text{structure}} + 0.70 \cdot R_{\text{entropy}} + 1.40 \cdot R_{\text{adherence}} + 1.75 \cdot R_{\text{saving}} + 1.05 \cdot R_{\text{income}} - 5.5\right)$$
+
+| Signal | Purpose | Formula |
+|---|---|---|
+| $R_{\text{recovery}}$ | Balance recovery speed after shocks | $\frac{1}{\|\mathcal{S}\|} \sum_{s \in \mathcal{S}} e^{-0.05 \cdot d_s}$ (exponential decay of days since dip) |
+| $R_{\text{goal}}$ | Goal funding consistency | $0.6 \cdot e^{-\text{CV}} + 0.4 \cdot \frac{\text{active\_months}}{\text{total\_months}}$ |
+| $R_{\text{structure}}$ | Spending structure sustainability | $\exp(-\frac{(r - 0.6)^2}{0.08})$ where $r = \frac{\text{essential}}{\text{total}}$ (Gaussian peak at 60% fixed) |
+| $R_{\text{entropy}}$ | Spending diversification | $\frac{H(\mathbf{p})}{\ln K}$ where $H(\mathbf{p}) = -\sum_i p_i \ln p_i$ (Shannon entropy of category distribution) |
+| $R_{\text{adherence}}$ | Budget adherence consistency | $\frac{1}{K} \sum_i e^{-\max(0, \delta_i)}$ where $\delta_i = \frac{\text{spent}_i - \text{budget}_i}{\text{budget}_i}$ |
+| $R_{\text{saving}}$ | Savings rate consistency | $0.5 \cdot \sigma(5 \cdot \text{avg\_rate}) + 0.5 \cdot e^{-2 \cdot \text{std\_rate}}$ |
+| $R_{\text{income}}$ | Income volatility absorption | $e^{-1.5 \cdot \text{CV}_{\text{income}}}$ (coefficient of variation) |
 
 ---
 
