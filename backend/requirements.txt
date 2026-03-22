@@ -12,5 +12,7 @@ pandas
 asyncpg
 passlib
 joblib
+apscheduler
 numpy
 jwt
+openai

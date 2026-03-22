@@ -20,6 +20,9 @@ class User(Base):
     entertainment_budget = Column(Float, default=0.0)
     other_budget = Column(Float, default=0.0)
 
+    prs = Column(Float)
+    resilience = Column(Float)
+
     # Relationships
     transactions = relationship("Transaction", back_populates="owner")
     subscriptions = relationship("Subscription", back_populates="owner")

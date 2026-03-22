@@ -3,7 +3,7 @@ import { api } from '@/api/axios'
 export interface Target {
   id: number
   name: string
-  description?: string
+  description: string
   start_date: string
   end_date: string
   current_amount: number
@@ -13,7 +13,7 @@ export interface Target {
 
 export interface CreateTargetRequest {
   name: string
-  description?: string
+  description: string
   start_date: string
   end_date: string
   current_amount: number

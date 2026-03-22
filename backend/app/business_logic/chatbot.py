@@ -1,7 +1,7 @@
 from repo.repositories import SavingRepository, UserRepository, TransactionRepository, SubscriptionRepository
 from business_logic.financial_preference import FinancialPreferenceAnalyzer
 from schemas import transaction as sche_transaction
-from google import genai    
+import openai
 from datetime import date
 
 class LLModel:
@@ -45,7 +45,7 @@ class LLModel:
 
     async def response(self):
         try:
-            client = genai.Client(api_key="your-api-key")
+            client = openai.AsyncOpenAI(api_key="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")
 
             rulebook = f"""
         Your name is Gugugaga - the helpful finance assistant that gives advice based on user's financial data. Give a short, clear response.
@@ -100,13 +100,16 @@ class LLModel:
             else:
                 prompt = alert_prompt
 
-            model = client.models.generate_content(
-                model="gemini-2.5-flash",
-                config={
-                    "system_instruction": rulebook
-                },
-                contents=prompt,
+            response = await client.chat.completions.create(
+                model="gpt-5.4", # Update this to the actual model name when released
+                messages=[
+                    {"role": "system", "content": rulebook},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7
             )
+
+            return response.choices[0].message.content
 
             return model.text
         except Exception as e:

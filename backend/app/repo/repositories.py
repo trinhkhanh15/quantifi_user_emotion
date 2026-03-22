@@ -108,6 +108,26 @@ class UserRepository(BaseRepository):
         monthly_budget = sum(getattr(user, budget_attr, 0) for budget_attr in CATEGORY_BUDGET_MAP.values()) 
         return monthly_budget
 
+    async def update_prs(self, user_id: int, prs_score: float):
+        """Update PRS (Persistent Regret Score) for a user"""
+        user = await self.get_by_id(user_id)
+        if not user:
+            return None
+        user.prs = prs_score
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user
+
+    async def update_resilience(self, user_id: int, resilience_score: float):
+        """Update Resilience score for a user"""
+        user = await self.get_by_id(user_id)
+        if not user:
+            return None
+        user.resilience = resilience_score
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user
+
 class SavingRepository(BaseRepository):
     async def create(self, user_id: int, target: sche_saving.CreateTarget):
         new_target = models.FinanceGoal(

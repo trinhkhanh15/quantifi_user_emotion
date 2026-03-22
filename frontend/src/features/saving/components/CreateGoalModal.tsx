@@ -43,11 +43,11 @@ export function CreateGoalModal({ open, onOpenChange }: CreateGoalModalProps) {
     e.preventDefault()
     const current = parseFloat(currentAmount.replace(/,/g, '.')) || 0
     const target = parseFloat(targetAmount.replace(/,/g, '.'))
-    if (!name.trim() || Number.isNaN(target) || target <= 0) return
+    if (!name.trim() || !description.trim() || Number.isNaN(target) || target <= 0) return
     createGoal.mutate(
       {
         name: name.trim(),
-        description: description.trim() || undefined,
+        description: description.trim(),
         start_date: startDate,
         end_date: endDate || startDate,
         current_amount: current,
@@ -85,7 +85,7 @@ export function CreateGoalModal({ open, onOpenChange }: CreateGoalModalProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={descId}>Description (optional)</Label>
+            <Label htmlFor={descId}>Description</Label>
             <Input
               id={descId}
               value={description}
@@ -145,7 +145,7 @@ export function CreateGoalModal({ open, onOpenChange }: CreateGoalModalProps) {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={createGoal.isPending || !name.trim() || !targetAmount}>
+            <Button type="submit" disabled={createGoal.isPending || !name.trim() || !description.trim() || !targetAmount}>
               {createGoal.isPending ? 'Creating...' : 'Create'}
             </Button>
           </DialogFooter>

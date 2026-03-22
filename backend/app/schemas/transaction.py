@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 class CreateTransaction(BaseModel):
-    date: Optional[datetime] = Field(default=None)
+    date: Optional[datetime] = Field(default_factory=datetime.now)
     amount: float
     category: Optional[str] = Field(default="UNCATEGORIZED")
     subscription_id: Optional[int] = Field(default=None)

@@ -3,11 +3,21 @@ from fastapi.middleware.cors import CORSMiddleware # Thêm dòng này
 from routers import user, saving, transaction, subscription, chatbot
 from contextlib import asynccontextmanager
 from repo.repositories import init_db
+# from core.scheduler import start_scheduler, stop_scheduler
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    # await start_scheduler()  # Start background tasks on app startup
+    # logger.info("✓ Application started with background scheduler")
     yield
+    # await stop_scheduler()  # Stop background tasks on app shutdown
+    # logger.info("✓ Application shutdown with background scheduler stopped")
 
 app = FastAPI(lifespan=lifespan)
 
