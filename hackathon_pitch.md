@@ -124,14 +124,14 @@ $$\text{amplifier} = 1.0 + 0.25 \cdot S_{\text{time}} \cdot S_{\text{vel}} + 0.3
 
 | Signal | Purpose | Formula |
 |---|---|---|
-| $S_{\text{budget}}$ | Budget breach severity | $\min(1, \max(0, \frac{\text{spent}_{\text{month}} + \text{txn} - \text{budget}}{\text{budget}}))$ |
-| $S_{\text{income}}$ | Transaction shock relative to income | $\min(1, (\frac{\text{txn}}{\text{monthly\_income}})^{0.7})$ |
-| $S_{\text{time}}$ | Late-night vulnerability | Piecewise: $0.0$ (6–21h), $0.3$ (21–23h), $0.7$ (23–1h), $1.0$ (1–5h), $0.5$ (5–6h) |
-| $S_{\text{goal}}$ | Goal conflict severity | $\min(1, \frac{\text{txn}}{\text{remaining\_needed}} \cdot \frac{30}{\max(\text{days\_left}, 1)})$ |
-| $S_{\text{freq}}$ | Category frequency anomaly | $\min(1, \max(0, \frac{\text{recent\_count} - \text{baseline\_weekly}}{\max(\text{baseline\_weekly}, 1)}))$ |
+| $S_{\text{budget}}$ | Budget breach severity | `min(1, max(0, (spent_month + txn - budget) / budget))` |
+| $S_{\text{income}}$ | Transaction shock relative to income | `min(1, (txn / income)^0.7)` |
+| $S_{\text{time}}$ | Late-night vulnerability | Piecewise: `0.0` (6–21h), `0.3` (21–23h), `0.7` (23–1h), `1.0` (1–5h), `0.5` (5–6h) |
+| $S_{\text{goal}}$ | Goal conflict severity | `min(1, (txn / remaining) * (30 / days_left))` |
+| $S_{\text{freq}}$ | Category frequency anomaly | `min(1, max(0, (recent_count - baseline) / baseline))` |
 | $S_{\text{cat}}$ | Category risk profile | Lookup table (Groceries: 0.00 → Gambling: 0.90) |
-| $S_{\text{dom}}$ | Day-of-month timing | $\max(0, \text{month\_remaining\_ratio} - \text{budget\_remaining\_ratio})$ |
-| $S_{\text{vel}}$ | Spending velocity (spree detection) | $\min(1, \frac{\text{txns\_last\_2h}}{5} \cdot 0.5 + \frac{\text{amount\_last\_2h}}{\text{daily\_budget}} \cdot 0.5)$ |
+| $S_{\text{dom}}$ | Day-of-month timing | `max(0, month_remaining_ratio - budget_remaining_ratio)` |
+| $S_{\text{vel}}$ | Spending velocity (spree detection) | `min(1, (txns_2h / 5) * 0.5 + (amount_2h / daily_budget) * 0.5)` |
 
 ---
 
@@ -141,12 +141,13 @@ $$\text{PRS} = \sigma\!\left(2.0 \cdot S_{\text{impulse}} + 2.5 \cdot S_{\text{b
 
 | Signal | Purpose | Formula |
 |---|---|---|
-| $S_{\text{impulse}}$ | Impulse spending ratio | $0.5 \cdot \frac{N_{\text{non-essential}}}{N_{\text{total}}} + 0.5 \cdot \frac{\text{sum\_amt}_{\text{non-ess}}}{\text{sum\_amt}_{\text{all}}}$ |
-| $S_{\text{budget}}$ | Budget overshoot across categories | $2 \cdot \sigma(3 \cdot \text{mean\_overshoot}) - 1$, clamped to $[0, 1]$ |
-| $S_{\text{goal}}$ | Goal disruption severity | $\frac{1}{G} \sum_g \left[0.6 \cdot \min(\frac{\text{non-goal\_spend}}{\text{remaining}_g}, 1) + 0.4 \cdot \sigma(\frac{\text{days\_now}}{\text{days\_counterfactual}} - 1)\right]$ |
-| $S_{\text{sub}}$ | Subscription churn signal | $\min(\frac{\text{cancelled\_14d}}{N_{\text{total\_subs}}}, 1)$ |
-| $S_{\text{night}}$ | Late-night spending ratio | $\frac{N_{\text{late-night non-ess}}}{N_{\text{recent}}}$ |
-| $S_{\text{pressure}}$ | Expense-to-income pressure | $\sigma(3 \cdot (\frac{E_{\text{month}}}{I_{\text{month}}} - 0.7))$ |
+| $S_{\text{impulse}}$ | Impulse spending ratio | `0.5 * (non_essential_count / total_count) + 0.5 * (non_essential_amt / total_amt)` |
+| $S_{\text{budget}}$ | Budget overshoot across categories | `2 * sigmoid(3 * mean_overshoot) - 1`, clamped to `[0, 1]` |
+| $S_{\text{goal}}$ | Goal disruption severity | `(1/G) * sum[0.6 
+* min(spend/remaining, 1) + 0.4 * sigmoid((days_now/days_target) - 1)]` |
+| $S_{\text{sub}}$ | Subscription churn signal | `min(cancelled_14d / total_subs, 1)` |
+| $S_{\text{night}}$ | Late-night spending ratio | `(late_night_non_ess_count / recent_count)` |
+| $S_{\text{pressure}}$ | Expense-to-income pressure | `sigmoid(3 * (expenses / income - 0.7))` |
 
 ---
 
@@ -156,13 +157,13 @@ $$\text{Resilience} = \sigma\!\left(1.75 \cdot R_{\text{recovery}} + 2.10 \cdot 
 
 | Signal | Purpose | Formula |
 |---|---|---|
-| $R_{\text{recovery}}$ | Balance recovery speed after shocks | $\frac{1}{\|\mathcal{S}\|} \sum_{s \in \mathcal{S}} e^{-0.05 \cdot d_s}$ (exponential decay of days since dip) |
-| $R_{\text{goal}}$ | Goal funding consistency | $0.6 \cdot e^{-\text{CV}} + 0.4 \cdot \frac{\text{active\_months}}{\text{total\_months}}$ |
-| $R_{\text{structure}}$ | Spending structure sustainability | $\exp(-\frac{(r - 0.6)^2}{0.08})$ where $r = \frac{\text{essential}}{\text{total}}$ (Gaussian peak at 60% fixed) |
-| $R_{\text{entropy}}$ | Spending diversification | $\frac{H(\mathbf{p})}{\ln K}$ where $H(\mathbf{p}) = -\sum_i p_i \ln p_i$ (Shannon entropy of category distribution) |
-| $R_{\text{adherence}}$ | Budget adherence consistency | $\frac{1}{K} \sum_i e^{-\max(0, \delta_i)}$ where $\delta_i = \frac{\text{spent}_i - \text{budget}_i}{\text{budget}_i}$ |
-| $R_{\text{saving}}$ | Savings rate consistency | $0.5 \cdot \sigma(5 \cdot \text{avg\_rate}) + 0.5 \cdot e^{-2 \cdot \text{std\_rate}}$ |
-| $R_{\text{income}}$ | Income volatility absorption | $e^{-1.5 \cdot \text{CV}_{\text{income}}}$ (coefficient of variation) |
+| $R_{\text{recovery}}$ | Balance recovery speed after shocks | `(1/|S|) * sum(exp(-0.05 * d_s))` — exponential decay of days since balance dip |
+| $R_{\text{goal}}$ | Goal funding consistency | `0.6 * exp(-CV) + 0.4 * (active_months / total_months)` |
+| $R_{\text{structure}}$ | Spending structure sustainability | `exp(-(r - 0.6)^2 / 0.08)` where `r = essential / total` (peak at 60% essential spending) |
+| $R_{\text{entropy}}$ | Spending diversification | `H(p) / ln(K)` where `H(p) = -sum(p_i * ln(p_i))` (Shannon entropy of category distribution) |
+| $R_{\text{adherence}}$ | Budget adherence consistency | `(1/K) * sum(exp(-max(0, overshoot_i)))` where `overshoot_i = (spent_i - budget_i) / budget_i` |
+| $R_{\text{saving}}$ | Savings rate consistency | `0.5 * sigmoid(5 * avg_rate) + 0.5 * exp(-2 * std_rate)` |
+| $R_{\text{income}}$ | Income volatility absorption | `exp(-1.5 * CV_income)` (coefficient of variation of monthly income) |
 
 ---
 
