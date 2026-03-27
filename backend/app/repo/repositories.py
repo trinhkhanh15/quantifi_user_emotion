@@ -127,6 +127,18 @@ class UserRepository(BaseRepository):
         await self.db.commit()
         await self.db.refresh(user)
         return user
+    
+    async def update_monthly_income(self, user_id: int, this_month_income: float):
+        user = await self.get_by_id(user_id)
+        if user.month_count == 0:
+            user.avg_income = this_month_income
+        else:
+            new_avg_income = ((user.avg_income * user.month_count) + this_month_income) / (user.month_count + 1)
+            user.avg_income = new_avg_income
+        user.month_count += 1
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user
 
 class SavingRepository(BaseRepository):
     async def create(self, user_id: int, target: sche_saving.CreateTarget):

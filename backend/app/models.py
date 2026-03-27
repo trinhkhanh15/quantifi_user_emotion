@@ -20,6 +20,9 @@ class User(Base):
     entertainment_budget = Column(Float, default=0.0)
     other_budget = Column(Float, default=0.0)
 
+    avg_income = Column(Float)
+    month_count = Column(Integer, default=0)
+
     prs = Column(Float)
     resilience = Column(Float)
 

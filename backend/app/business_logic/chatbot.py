@@ -22,15 +22,16 @@ class LLModel:
     data = {}
     async def request(self, context: str):
         analyzer = FinancialPreferenceAnalyzer(self.user_repo, self.transaction_repo, self.subscription_repo, self.saving_repo)
-        irs = await analyzer.to_irs(self.user_id, self.transaction)
-        prs = await analyzer.to_prs(self.user_id)
-        resilience = await analyzer.to_resilience(self.user_id)
+        irs = (await analyzer.to_irs(self.user_id, self.transaction)).get("final_score")
+        prs = (await analyzer.to_prs(self.user_id)).get("final_score")
+        resilience = (await analyzer.to_resilience(self.user_id)).get("final_score")
 
         today = date.today()
         monthly_income = await self.transaction_repo.get_monthly_income(self.user_id, date(today.year, today.month, 1), today)
         monthly_budget = await self.user_repo.get_monthly_budget(self.user_id)
         spend_this_month = await self.transaction_repo.get_monthly_spending(self.user_id, date(today.year, today.month, 1), today)
         current_saving = await self.saving_repo.get_by_user_id_and_status(self.user_id, "Processing")
+        active_subscription = await self.subscription_repo.my_subscription(self.user_id)
 
         self.data.update({
             "context": context,
@@ -40,12 +41,13 @@ class LLModel:
             "monthly_income": monthly_income,
             "monthly_budget": monthly_budget,
             "spend_this_month": spend_this_month,
-            "current_saving": current_saving
+            "current_saving": current_saving,
+            "active_subscription": active_subscription
         })
 
     async def response(self):
         try:
-            client = openai.AsyncOpenAI(api_key="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")
+            client = openai.AsyncOpenAI(api_key="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")
 
             rulebook = f"""
         Your name is Gugugaga - the helpful finance assistant that gives advice based on user's financial data. Give a short, clear response.
@@ -70,6 +72,8 @@ class LLModel:
         - Monthly Income: {self.data.get("monthly_income")}
         - Monthly Budget: {self.data.get("monthly_budget")}
         - Spend This Month: {self.data.get("spend_this_month")}
+        - Current Saving: {self.data.get("current_saving")}
+        - Active Subscription: {self.data.get("active_subscription")}
         If IRS < 0.65, you can said something supportive.
         If IRS >= 0.65, you need to alert the user about their high regret level. Then you should ask user to consider their financial situation more carefully before making a decision.
         Maximum 4 sentences.
@@ -84,6 +88,7 @@ class LLModel:
         - Monthly Budget: {self.data.get("monthly_budget")}
         - Spend This Month: {self.data.get("spend_this_month")}
         - Current Saving: {self.data.get("current_saving")}
+        - Active Subscription: {self.data.get("active_subscription")}
         They asking: "{self.data.get("context")}". 
         Identifying the user's message purpose, if they give all relevant information, you need to address it directly.
         OUTPUT STRUCTURE:
@@ -101,7 +106,7 @@ class LLModel:
                 prompt = alert_prompt
 
             response = await client.chat.completions.create(
-                model="gpt-5.4", # Update this to the actual model name when released
+                model="gpt-5.4-nano", 
                 messages=[
                     {"role": "system", "content": rulebook},
                     {"role": "user", "content": prompt}

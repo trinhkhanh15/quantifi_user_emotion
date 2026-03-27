@@ -16,3 +16,4 @@ apscheduler
 numpy
 jwt
 openai
+apscheduler

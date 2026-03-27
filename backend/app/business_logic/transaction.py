@@ -47,6 +47,8 @@ async def alert_regret(user_id,
                        transaction_repo: TransactionRepository,
                        subscription_repo: SubscriptionRepository,
                        saving_repo: SavingRepository):
+    if data.category == "income":
+        return "Are you sure want to create this transaction?"
     llm = LLModel(user_id, data, user_repo, transaction_repo, subscription_repo, saving_repo)
     await llm.request("alert")
     response = await llm.response()

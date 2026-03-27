@@ -26,14 +26,26 @@ function formatDateInput(d: Date) {
   return `${y}-${m}-${day}`
 }
 
+function formatTimeInput(d: Date) {
+  const h = String(d.getHours()).padStart(2, '0')
+  const min = String(d.getMinutes()).padStart(2, '0')
+  return `${h}:${min}`
+}
+
+function formatDateTimeISO(dateStr: string, timeStr: string) {
+  return `${dateStr}T${timeStr}:00`
+}
+
 export function TransactionModal({ open, onOpenChange }: TransactionModalProps) {
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [date, setDate] = useState(formatDateInput(new Date()))
+  const [time, setTime] = useState(formatTimeInput(new Date()))
   const [category, setCategory] = useState<TransactionCategory>(TRANSACTION_CATEGORIES[0])
   const amountId = useId()
   const descId = useId()
   const dateId = useId()
+  const timeId = useId()
   const categoryId = useId()
 
   const [showAlert, setShowAlert] = useState(false)
@@ -51,12 +63,12 @@ export function TransactionModal({ open, onOpenChange }: TransactionModalProps) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const num = parseFloat(amount.replace(/,/g, '.'))
-    if (Number.isNaN(num) || !description.trim() || !date || !category.trim()) return
+    if (Number.isNaN(num) || !description.trim() || !date || !time || !category.trim()) return
 
     const transactionData = {
       amount: num,
       description: description.trim(),
-      date,
+      date: formatDateTimeISO(date, time),
       category: category.trim(),
     }
 
@@ -83,6 +95,7 @@ export function TransactionModal({ open, onOpenChange }: TransactionModalProps) 
           setAmount('')
           setDescription('')
           setDate(formatDateInput(new Date()))
+          setTime(formatTimeInput(new Date()))
           setCategory(TRANSACTION_CATEGORIES[0])
           onOpenChange(false)
           handleCancelAlert()
@@ -129,6 +142,16 @@ export function TransactionModal({ open, onOpenChange }: TransactionModalProps) 
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
+                disabled={createTransaction.isPending || alertRegret.isPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={timeId}>Time</Label>
+              <Input
+                id={timeId}
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
                 disabled={createTransaction.isPending || alertRegret.isPending}
               />
             </div>

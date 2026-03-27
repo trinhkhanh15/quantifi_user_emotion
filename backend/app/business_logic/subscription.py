@@ -36,22 +36,31 @@ async def trigger_subscription(user_id: int,
     return data
 
 async def check_billing_date(user_id: int,
-                       subscription_id: int,
                        user_repo: UserRepository,
                        transaction_repo: TransactionRepository,
                        subscription_repo: SubscriptionRepository,):
-    current_subscription = await validate_subscription(user_id, subscription_id, subscription_repo)
+    subs_list = await subscription_repo.my_subscription(user_id)
     now = date.today()
-    next_billing_date = current_subscription.next_billing_date
-    if next_billing_date == now:
-        new_transaction = sche_transaction.CreateTransaction(
-            amount=current_subscription.amount,
-            description=current_subscription.service_name,
-            date=datetime.now(),
-            category="subscription",
-        )
-        from business_logic.transaction import process_transaction
-        await process_transaction(user_id, new_transaction, user_repo, transaction_repo, subscription_repo)
+
+    for current_subscription in subs_list:
+        subscription_id = current_subscription.id
+        try:
+            next_billing_date = current_subscription.next_billing_date
+            if next_billing_date == now:
+                new_transaction = sche_transaction.CreateTransaction(
+                    amount=current_subscription.amount,
+                    description=current_subscription.service_name,
+                    date=datetime.now(),
+                    category="subscription",
+                )
+                from business_logic.transaction import process_transaction
+                await process_transaction(user_id, new_transaction, user_repo, transaction_repo, subscription_repo)
+                msg = f"Paid for subscription ID={subscription_id} - service '{current_subscription.service_name}' successfully."
+                log_activity(msg, "info")
+        except Exception as e:
+            msg = f"Paid for subscription ID={subscription_id} - service '{current_subscription.service_name}' failed: {e}"
+            log_activity(msg, "error")
+        
 
 async def update_next_billing_date(user_id: int,
                              subscription_id: int,
