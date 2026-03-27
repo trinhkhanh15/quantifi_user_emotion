@@ -47,7 +47,7 @@ class LLModel:
 
     async def response(self):
         try:
-            client = openai.AsyncOpenAI(api_key="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")
+            client = openai.AsyncOpenAI(api_key="your-api-key")
 
             rulebook = f"""
         Your name is Gugugaga - the helpful finance assistant that gives advice based on user's financial data. Give a short, clear response.
