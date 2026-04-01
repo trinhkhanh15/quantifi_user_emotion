@@ -178,8 +178,8 @@ Main SQLAlchemy entities:
 
 Behavior analysis is represented by three score families:
 
-- **IRS** (Impulse-related score)
-- **PRS** (Pattern/regularity-related score)
+- **IRS** (Immediate Regret Score)
+- **PRS** (Periodic Regret Score)
 - **Resilience** (Financial resilience score)
 
 These scores are computed in `backend/app/business_logic/financial_preference.py` using schema contracts in:
