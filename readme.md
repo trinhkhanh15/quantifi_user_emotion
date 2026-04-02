@@ -61,7 +61,7 @@ Quantifi helps users:
   - Pre-transaction regret alert endpoint
   - Chatbot responses informed by user financial behavior and profile metrics
 
-## Scoring Model (Core Logic)
+## Scoring Model
 
 Behavior analysis is represented by three score families:
 
