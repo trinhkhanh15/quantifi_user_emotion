@@ -454,10 +454,6 @@ class TransactionRepository(BaseRepository):
 
     async def get_late_night_non_essential_count(self, user_id: int, start_date: date, end_date: date,
                                                   non_essential_categories: list[str]) -> tuple[int, int]:
-        """
-        Trả về (late_night_non_essential_count, total_count).
-        Late night: 23:00 – 05:00.
-        """
         base_filter = [
             models.Transaction.user_id == user_id,
             func.date(models.Transaction.date) >= start_date,
@@ -669,10 +665,7 @@ class SubscriptionRepository(BaseRepository):
         return True
     
     async def get_cancelled_count_last_14d(self, user_id: int) -> int:
-        """
-        Dem so subscription bi cancel trong 14 ngay gan nhat.
-        Dua vao is_active=False va cancelled_at trong khoang thoi gian.
-        """
+
         cutoff = datetime.utcnow() - timedelta(days=14)
         query = select(func.count(models.Subscription.id)).filter(
             models.Subscription.user_id == user_id,
@@ -683,9 +676,6 @@ class SubscriptionRepository(BaseRepository):
         return result.scalar() or 0
  
     async def get_total_count(self, user_id: int) -> int:
-        """
-        Dem tong so subscription (ca active lan cancelled) cua user.
-        """
         query = select(func.count(models.Subscription.id)).filter(
             models.Subscription.user_id == user_id,
         )
